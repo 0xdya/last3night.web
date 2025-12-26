@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<title>الثلث الأخير من الليل - الجزائر</title>
+<style>
+  body { font-family: sans-serif; background: #0f172a; color: #e5e7eb; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+  .box { background: #020617; padding: 20px; border-radius: 12px; width: 360px; }
+  select, input, button { width: 100%; padding: 8px 0; margin-top: 10px; border-radius: 6px; border: none; }
+  button { background: #2563eb; color: white; cursor: pointer; }
+  .result { margin-top: 15px; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="box">
+  <h3 style="text-align:center">الثلث الأخير من الليل</h3>
+<!--
+  <label>اختر المدينة:</label>
+-->
+  <select hidden id="city"></select>
+  <label>المغرب (اختياري للتعديل):</label>
+  <input type="time" id="maghrib">
+
+  <label>الفجر (اختياري للتعديل):</label>
+  <input type="time" id="fajr">
+
+  <button onclick="fetchTimes()">احسب الآن</button>
+
+  <div class="result" id="result">النتيجة ستظهر هنا</div>
+</div>
+
+<script>
+const cities = [
+  { name: "بشار", lat: 30.5102939, lon: -2.8125926 },
+  { name: "الجزائر العاصمة", lat: 36.7525, lon: 3.04197 },
+  { name: "وهران", lat: 35.6971, lon: -0.6359 },
+  { name: "قسنطينة", lat: 36.365, lon: 6.6147 }
+];
+
+const sel = document.getElementById("city");
+cities.forEach(c => sel.innerHTML += `<option value="${c.lat},${c.lon}">${c.name}</option>`);
+
+sel.value = `${cities[0].lat},${cities[0].lon}`;
+
+function toMinutes(t) {
+  const [h,m] = t.split(":").map(Number);
+  return h*60 + m;
+}
+
+function formatTime(m) {
+  m = (m + 1440) % 1440;
+  return String(Math.floor(m/60)).padStart(2,'0') + ":" + String(m%60).padStart(2,'0');
+}
+
+async function fetchTimes() {
+  const [lat, lon] = document.getElementById("city").value.split(",");
+  const today = new Date().toISOString().split("T")[0];
+
+  try {
+    const res = await fetch(`https://api.aladhan.com/v1/timings/${today}?latitude=${lat}&longitude=${lon}&method=3`);
+    const data = await res.json();
+
+    if (!data.data) {
+      document.getElementById("result").innerText = "فشل جلب أوقات الصلاة";
+      return;
+    }
+
+    let maghrib = document.getElementById("maghrib").value || data.data.timings.Maghrib;
+    let fajr = document.getElementById("fajr").value || data.data.timings.Fajr;
+
+    let m1 = toMinutes(maghrib);
+    let m2 = toMinutes(fajr);
+    if (m2 <= m1) m2 += 1440;
+
+    const night = m2 - m1;
+    const lastThirdStart = m2 - (night/3);
+
+    document.getElementById("result").innerHTML = `
+      المغرب: ${maghrib}<br>
+      الفجر: ${fajr}<br><br>
+      يبدأ الثلث الأخير عند:<br>
+      <b>${formatTime(lastThirdStart)}</b><br>
+      وينتهي عند الفجر:<br>
+      <b>${formatTime(m2)}</b>
+    `;
+  } catch (err) {
+    document.getElementById("result").innerText = "حدث خطأ: " + err.message;
+  }
+}
+
+fetchTimes();
+</script>
+  <script>
+    // تسجيل الـ Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(registration => console.log('Service Worker مسجل:', registration))
+          .catch(error => console.log('خطأ في التسجيل:', error));
+      });
+    }
+  </script>
+</body>
+</html>
