@@ -6,11 +6,25 @@
 <link rel="manifest" href="manifest.json">
 <title>الثلث الأخير من الليل - الجزائر</title>
 <style>
-  body { font-family: sans-serif; background: #0f172a; color: #e5e7eb; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-  .box { background: #020617; padding: 20px; border-radius: 12px; width: 360px; }
+  body { font-family: sans-serif; background: #0f172a; color: #e5e7eb; display: flex; justify-content: center; align-items: center;height: 100vh; 
+    flex-direction: column; 
+  }
+  .box { background: #020617; padding: 20px; border-radius: 12px; width: 320px; }
   select, input, button { width: 100%; padding: 8px 0; margin-top: 10px; border-radius: 6px; border: none; }
   button { background: #2563eb; color: white; cursor: pointer; }
   .result { margin-top: 15px; text-align: center; }
+  .link{
+    position: fixed;
+    bottom: 0;
+    border: 2px;
+    border-color: red;
+    border-radius: 4px;
+    padding: 4px 1rem;
+    background: #ededed;
+    color: #222;
+    margin: 1rem;
+    text-decoration: none;
+  }
 </style>
 </head>
 <body>
@@ -31,7 +45,7 @@
 
   <div class="result" id="result">النتيجة ستظهر هنا</div>
 </div>
-
+<a class="link" href="https://dya-quran.web.app">see my quran web</a>
 <script>
 const cities = [
   { name: "بشار", lat: 30.5102939, lon: -2.8125926 },
